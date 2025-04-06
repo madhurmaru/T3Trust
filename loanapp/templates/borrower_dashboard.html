@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+{% block content %}
+<h1 class="text-4xl font-bold text-center text-blue-600 mb-10">
+    {% trans "UPI Loan Nexus" %} <span class="text-black">{% trans "Borrower Dashboard" %}</span>
+</h1>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Active Loans -->
+    <div class="bg-white rounded-xl shadow p-5">
+        <h2 class="text-lg font-semibold text-blue-800 flex items-center gap-2 mb-4">
+            <span>📄</span> {% trans "Active Loans" %}
+        </h2>
+        {% for loan in active_loans %}
+            <div class="flex justify-between items-center border p-3 rounded-lg mb-3">
+                <div>
+                    <p class="font-medium">₹{{ loan.amount }}</p>
+                    <p class="text-sm text-gray-500">{% blocktrans with interest=loan.interest_rate %}at {{ interest }}% interest{% endblocktrans %}</p>
+                </div>
+                <div class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm">
+                    📅 {{ loan.due }}
+                </div>
+            </div>
+        {% empty %}
+            <p class="text-gray-500">{% trans "No active loans" %}</p>
+        {% endfor %}
+    </div>
+
+    <!-- Credit Score -->
+    <div class="bg-white rounded-xl shadow p-5">
+        <h2 class="text-lg font-semibold text-blue-800 flex items-center gap-2 mb-4">
+            <span>📈</span> {% trans "Credit Score (via UPI)" %} <span class="text-gray-400 cursor-help">ⓘ</span>
+        </h2>
+        <div class="flex flex-col items-center">
+            <div class="w-32 h-32 rounded-full border-8 {% if user.trust_score >= 750 %}border-green-400{% elif user.trust_score >= 600 %}border-yellow-400{% else %}border-red-400{% endif %} flex items-center justify-center text-3xl font-bold">
+                {{ user.trust_score }}
+            </div>
+            <p class="text-gray-500 mt-2">{% trans "out of 1000" %}</p>
+            <p class="mt-2 px-3 py-1 rounded-full text-sm {% if user.trust_score >= 750 %}text-green-600 border-green-600/50{% elif user.trust_score >= 600 %}text-yellow-600 border-yellow-600/50{% else %}text-red-600 border-red-600/50{% endif %} border">
+                {% if user.trust_score >= 750 %}{% trans "Good" %}{% elif user.trust_score >= 600 %}{% trans "Fair" %}{% else %}{% trans "Poor" %}{% endif %}
+            </p>
+        </div>
+    </div>
+
+    <!-- Wallet Balance -->
+    <div class="bg-white rounded-xl shadow p-5">
+        <h2 class="text-lg font-semibold text-blue-800 flex items-center gap-2 mb-4">
+            <span>💼</span> {% trans "Wallet Balance + Interest" %}
+        </h2>
+        <div class="text-center">
+            <p class="text-3xl font-bold">₹{{ user.wallet_balance }}</p>
+            <p class="text-sm text-gray-500 mb-3">{% trans "Current Balance" %}</p>
+            <hr class="mb-3">
+            <p class="text-red-600 font-medium">₹{{ interest_payable|floatformat:2 }}</p>
+            <p class="text-sm text-gray-400">{% trans "Upcoming Interest Payable" %}</p>
+            <p class="text-xs text-gray-400 mt-1 italic">{% trans "All transactions processed via this wallet." %}</p>
+        </div>
+    </div>
+
+    <!-- Available Lenders -->
+    <div class="bg-white rounded-xl shadow p-5">
+        <h2 class="text-lg font-semibold text-blue-800 flex items-center gap-2 mb-4">
+            <span>🤝</span> {% trans "Available Lenders" %}
+        </h2>
+        George<div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="lender-list">
+            {% for lender in lenders %}
+                <div class="border rounded-lg p-3">
+                    <div class="flex justify-between items-center mb-1">
+                        <p class="font-semibold">{{ lender.phone_number }}</p>
+                        <span class="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full">{% trans "N/A" %} {% trans "interest" %}</span>
+                    </div>
+                    <p class="text-lg font-bold mb-2">₹{{ lender.wallet_balance }}</p>
+                    <button class="w-full bg-blue-600 text-white py-1 rounded hover:bg-blue-700 transition request-loan" data-lender="{{ lender.phone_number }}">{% trans "Request" %}</button>
+                </div>
+            {% empty %}
+                <p class="text-gray-500">{% trans "No lenders available" %}</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<footer class="mt-12 text-center text-gray-400 text-sm">
+    {% trans "UPI Loan Nexus ©️ 2025 – Emergency Loan System" %}
+</footer>
+{% endblock %}

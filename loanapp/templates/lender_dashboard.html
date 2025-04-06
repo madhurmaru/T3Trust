@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+{% block content %}
+<h1 class="text-4xl font-bold text-center text-green-600 mb-10">
+    {% trans "UPI Loan Nexus" %} <span class="text-black">{% trans "Lender Dashboard" %}</span>
+</h1>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Investment Summary -->
+    <div class="bg-white rounded-xl shadow p-5 text-center">
+        <h2 class="text-lg font-semibold text-green-800 mb-4">📊 {% trans "Investment Summary" %}</h2>
+        <p class="text-3xl font-bold text-green-600">₹{{ total_lent|floatformat:2 }}</p>
+        <p class="text-sm text-gray-500 mb-3">{% trans "Total Lent" %}</p>
+        <hr class="mb-3">
+        <p class="text-blue-600 font-medium">₹{{ total_returns|floatformat:2 }}</p>
+        <p class="text-sm text-gray-400">{% trans "Total Interest Earned" %}</p>
+    </div>
+
+    <!-- Borrowers List -->
+    <div class="bg-white rounded-xl shadow p-5">
+        <h2 class="text-lg font-semibold text-green-800 mb-4">🤝 {% trans "Your Borrowers" %}</h2>
+        {% for loan in loans_lent %}
+            <div class="border rounded-lg p-3 mb-3">
+                <div class="flex justify-between">
+                    <div>
+                        <p class="font-semibold text-lg">{{ loan.borrower__phone_number }}</p>
+                        <p class="text-gray-500 text-sm">{% blocktrans with amount=loan.amount %}Amount: ₹{{ amount }}{% endblocktrans %}</p>
+                    </div>
+                    <div class="text-sm font-medium {% if loan.status == 'On Time' %}text-green-600{% else %}text-red-600{% endif %}">
+                        ⏱ {{ loan.status }} ({{ loan.due }})
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p class="text-gray-500">{% trans "No borrowers yet" %}</p>
+        {% endfor %}
+    </div>
+
+    <!-- Loan Requests -->
+    <div class="bg-white rounded-xl shadow p-5 col-span-1 md:col-span-2">
+        <h2 class="text-lg font-semibold text-green-800 mb-4">📋 {% trans "Pending Loan Requests" %}</h2>
+        <div id="request-list"></div>
+    </div>
+</div>
+
+<footer class="mt-12 text-center text-gray-400 text-sm">
+    {% trans "UPI Loan Nexus ©️ 2025 – Empowering Micro Lending" %}
+</footer>
+{% endblock %}
